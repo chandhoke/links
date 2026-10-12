@@ -155,6 +155,53 @@
         justify-self: end;
       }
 
+      .action-text {
+        display: grid;
+        gap: 3px;
+      }
+
+      .action-text small {
+        font-family: "Public Sans", sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: 0.01em;
+        text-transform: none;
+      }
+
+      .call-fallback {
+        margin-top: -2px;
+        padding: 12px 14px;
+        color: var(--ink);
+        background: var(--paper);
+        border: 2px solid var(--ink);
+        font-size: 0.82rem;
+        font-weight: 700;
+        line-height: 1.35;
+      }
+
+      .call-fallback p { margin: 0; }
+
+      .copy-number {
+        margin-top: 9px;
+        padding: 9px 12px;
+        color: var(--paper);
+        background: var(--ink);
+        border: 0;
+        border-radius: 0;
+        font: 700 0.82rem/1 "Public Sans", sans-serif;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+
+      .copy-status {
+        display: block;
+        min-height: 1.1em;
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 0.76rem;
+      }
+
       .action:hover { background: #ffe45e; }
 
       .action:active {
@@ -203,6 +250,8 @@
         .panel::before { background: var(--yellow); }
         .tagline span, .action { color: #23271a; }
         .action { border-color: var(--yellow); box-shadow: 0 6px 0 var(--yellow); }
+        .call-fallback { border-color: var(--yellow); }
+        .copy-number { color: #23271a; background: var(--yellow); }
         .action:hover { background: #ffe45e; }
         .action:active { box-shadow: 0 2px 0 var(--yellow); }
         .action:focus-visible { outline-color: var(--yellow); }
@@ -227,19 +276,25 @@
         </div>
 
         <nav class="actions" aria-label="Contact and location links">
-          <a class="action" href="tel:+17809007741" aria-label="Call Tech-Eyes Wetaskiwin now">
+          <a class="action" id="call-link" href="tel:+17809007741" target="_self" aria-label="Call Tech-Eyes Wetaskiwin at 780-900-7741">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7.2 3.5 10 7.7 7.8 10a15 15 0 0 0 6.2 6.2l2.3-2.2 4.2 2.8v3a1.7 1.7 0 0 1-1.7 1.7A16.3 16.3 0 0 1 2.5 5.2a1.7 1.7 0 0 1 1.7-1.7h3Z"/></svg>
-            <span>Call now</span>
+            <span class="action-text"><span>Call now</span><small>(780) 900-7741</small></span>
             <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 7 7-7 7"/></svg>
           </a>
 
-          <a class="action" href="https://www.google.com/maps/search/?api=1&amp;query=Tech-Eyes+Wetaskiwin+3725+56+St+Unit+1540+Wetaskiwin+AB" target="_blank" rel="noopener noreferrer" aria-label="Get directions to Tech-Eyes Wetaskiwin">
+          <div class="call-fallback" id="call-fallback" hidden tabindex="-1">
+            <p>If Instagram blocks the dialer, copy the number and call from your Phone app.</p>
+            <button class="copy-number" id="copy-number" type="button">Copy (780) 900-7741</button>
+            <span class="copy-status" id="copy-status" role="status" aria-live="polite"></span>
+          </div>
+
+          <a class="action" href="https://www.google.com/maps/search/?api=1&amp;query=Tech-Eyes+Wetaskiwin+3725+56+St+Unit+1540+Wetaskiwin+AB" target="_self" aria-label="Get directions to Tech-Eyes Wetaskiwin">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3 9 9-9 9-9-9 9-9Z"/><path d="M8 13v-2h7m-2-2 2 2-2 2"/></svg>
             <span>Directions</span>
             <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 7 7-7 7"/></svg>
           </a>
 
-          <a class="action" href="https://www.google.com/maps/search/?api=1&amp;query=Tech-Eyes+Wetaskiwin+3725+56+St+Unit+1540+Wetaskiwin+AB" target="_blank" rel="noopener noreferrer" aria-label="Leave Tech-Eyes Wetaskiwin a Google review">
+          <a class="action" href="https://www.google.com/maps/place/Tech-Eyes+Wetaskiwin+Store/@52.9538947,-113.3881096,17z/data=!3m1!4b1!4m6!3m5!1s0x53754f7fa376ccd3:0xbe87fc26fa25518e!8m2!3d52.9538947!4d-113.3881096!16s%2Fg%2F11vp_qwcls" target="_self" aria-label="Leave Tech-Eyes Wetaskiwin a Google review">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>
             <span>Leave a Google review</span>
             <svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 7 7-7 7"/></svg>
@@ -247,5 +302,56 @@
         </nav>
       </section>
     </main>
+    <script>
+      (function () {
+        var callLink = document.getElementById("call-link");
+        var fallback = document.getElementById("call-fallback");
+        var copyButton = document.getElementById("copy-number");
+        var copyStatus = document.getElementById("copy-status");
+        var phone = "+17809007741";
+
+        callLink.addEventListener("click", function () {
+          fallback.hidden = false;
+          fallback.focus();
+        });
+
+        copyButton.addEventListener("click", function () {
+          var fallbackTimer;
+
+          function showCopied() {
+            window.clearTimeout(fallbackTimer);
+            copyStatus.textContent = "Number copied.";
+            copyButton.textContent = "Copied";
+          }
+
+          function showManualFallback() {
+            window.clearTimeout(fallbackTimer);
+            copyStatus.textContent = "If it did not copy, press and hold the number on the Call button.";
+          }
+
+          copyStatus.textContent = "Copying number…";
+          fallbackTimer = window.setTimeout(showManualFallback, 1200);
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(phone).then(showCopied, showManualFallback);
+          } else {
+            var field = document.createElement("textarea");
+            field.value = phone;
+            field.setAttribute("readonly", "");
+            field.style.position = "fixed";
+            field.style.opacity = "0";
+            document.body.appendChild(field);
+            field.select();
+            try {
+              if (document.execCommand("copy")) showCopied();
+              else showManualFallback();
+            } catch (error) {
+              showManualFallback();
+            }
+            field.remove();
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
